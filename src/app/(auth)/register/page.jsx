@@ -4,8 +4,12 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Button } from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth-client";
+
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -18,28 +22,52 @@ const RegisterPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  // 🔐 Register Submit
-  const onSubmit = async (data) => {
-    const { password } = data;
+  //  Register Submit
+  const onSubmit = async (formData) => {
+    console.log(" Submit clicked");
+    console.log("Form Data:", formData);
 
-    // ✅ Password Validation
+    const { password } = formData;
+
+    //  Password Validation
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
 
     if (!passwordRegex.test(password)) {
+      console.log(" Password validation failed");
       return toast.error(
         "Password must be 6+ characters with uppercase & lowercase"
       );
     }
 
     try {
-      console.log("Register Data:", data);
+      const response = await authClient.signUp.email({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        image: formData.photo,
+        callbackURL: "/login",
+      });
 
-      // 👉 এখানে Firebase / API logic বসাবে
+      console.log(" Auth Response:", response);
 
       toast.success("Registration successful!");
-      router.push("/"); // redirect
+      router.push("/login");
     } catch (error) {
+      console.error(" Error:", error);
       toast.error("Registration failed!");
+    }
+  };
+
+  //  Google Login
+  const handleGoogleLogin = async () => {
+    try {
+       const data = await authClient.signIn.social({
+    provider: "google",
+  });
+      toast.success("Google Login successful!");
+      // router.push("/");
+    } catch (error) {
+      toast.error("Google login failed!");
     }
   };
 
@@ -136,6 +164,23 @@ const RegisterPage = () => {
           >
             {isSubmitting ? "Creating..." : "Register"}
           </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-slate-300"></div>
+            <span className="text-sm text-slate-500">OR</span>
+            <div className="flex-1 h-px bg-slate-300"></div>
+          </div>
+
+          {/* Google Login */}
+          <Button
+            onClick={handleGoogleLogin}
+            className="w-full rounded-lg flex items-center justify-center gap-2"
+            variant="tertiary"
+          >
+            <Icon icon="devicon:google" />
+            Sign in with Google
+          </Button>
         </form>
 
         {/* Footer */}

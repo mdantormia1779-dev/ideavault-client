@@ -5,9 +5,10 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
 import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth-client";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -21,25 +22,40 @@ const LoginPage = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
 
   //  Handle Login
-  const onSubmit = async (data) => {
-    try {
-      console.log("Login Data:", data);
+  const onSubmit = async (formData) => {
+    console.log("🔥 Login Data:", formData);
 
-      //  এখানে API / Firebase login logic বসাবে
+    try {
+      const res = await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password,
+        rememberMe: true,
+        callbackURL: "/",
+      });
+
+      console.log("Response:", res);
+
+      //  error handle
+      if (res?.error) {
+        return toast.error(res.error.message || "Login failed");
+      }
 
       toast.success("Login successful!");
-      router.push("/"); // redirect
-    } catch (error) {
-      toast.error("Login failed!");
+      router.push("/");
+    } catch (err) {
+      console.error("❌ Catch Error:", err);
+      toast.error("Something went wrong!");
     }
   };
 
-  // 🔵 Google Login
+  //  Google Login
   const handleGoogleLogin = async () => {
     try {
-      //  Google auth logic
+      const data = await authClient.signIn.social({
+        provider: "google",
+      });
       toast.success("Google Login successful!");
-      router.push("/");
+      // router.push("/");
     } catch (error) {
       toast.error("Google login failed!");
     }
@@ -49,12 +65,10 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center from-slate-100 to-slate-200 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-        {/* Title */}
         <h2 className="text-3xl font-bold text-center text-slate-800 mb-8">
           Login Account
         </h2>
 
-        {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
           {/* Email */}
@@ -99,7 +113,6 @@ const LoginPage = () => {
                 })}
               />
 
-              {/* 👁 Show/Hide */}
               <button
                 type="button"
                 onClick={() => setIsShowPassword(!isShowPassword)}
@@ -116,14 +129,14 @@ const LoginPage = () => {
             )}
           </div>
 
-          {/* Forgot Password */}
+          {/* Forgot */}
           <Link href="/forget" className="flex justify-end">
             <span className="text-sm text-blue-600 hover:underline">
               Forgot Password?
             </span>
           </Link>
 
-          {/* Login Button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -140,7 +153,7 @@ const LoginPage = () => {
           <div className="flex-1 h-px bg-slate-300"></div>
         </div>
 
-        {/* Google Login */}
+        {/* Google */}
         <Button
           onClick={handleGoogleLogin}
           className="w-full rounded-lg flex items-center justify-center gap-2"
