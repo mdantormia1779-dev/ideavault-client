@@ -13,13 +13,13 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
       const { data } = await authClient.getSession();
       setUser(data?.user || null);
     };
-
     fetchSession();
   }, []);
 
@@ -29,7 +29,6 @@ const Navbar = () => {
         setOpen(false);
       }
     };
-
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
@@ -40,51 +39,57 @@ const Navbar = () => {
     router.push("/login");
   };
 
-  //  avatar fallback state
-  const [imgError, setImgError] = useState(false);
-
   return (
-    <header className="w-full bg-white dark:bg-gray-900 shadow-md">
-      <nav className="container mx-auto flex items-center justify-between px-4 py-4">
+    <header className="w-full sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b">
+      <nav className="container mx-auto flex items-center justify-between px-4 py-3">
 
-        <Link href="/" className="text-2xl font-bold">
+        {/* Logo */}
+        <Link href="/" className="text-2xl font-extrabold tracking-tight text-blue-600">
           IdeaVault
         </Link>
 
-        <ul className="hidden md:flex gap-6">
-          <li><Link href="/">Home</Link></li>
-          <li><Link href="/ideas">Ideas</Link></li>
-          <li><Link href="/add-ideas">Add Idea</Link></li>
-          <li><Link href="/my-ideas">My Ideas</Link></li>
-          <li><Link href="/my-interactions">My Interactions</Link></li>
+        {/* Menu */}
+        <ul className="hidden md:flex items-center gap-6 font-medium text-gray-700 dark:text-gray-200">
+          <li><Link href="/" className="hover:text-blue-600 transition">Home</Link></li>
+          <li><Link href="/ideas" className="hover:text-blue-600 transition">Ideas</Link></li>
+          <li><Link href="/add-ideas" className="hover:text-blue-600 transition">Add Idea</Link></li>
+          <li><Link href="/my-ideas" className="hover:text-blue-600 transition">My Ideas</Link></li>
+          <li><Link href="/my-interactions" className="hover:text-blue-600 transition">My Interactions</Link></li>
         </ul>
 
-        <div className="flex items-center gap-4">
+        {/* Right Side */}
+        <div className="flex items-center gap-3">
 
           {!user ? (
-            <div className="flex gap-3">
-              <Link href="/login" className="px-3 py-1 border rounded">
+            <div className="flex gap-2">
+              <Link
+                href="/login"
+                className="px-4 py-1.5 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              >
                 Login
               </Link>
-              <Link href="/register" className="px-3 py-1 bg-blue-600 text-white rounded">
+              <Link
+                href="/register"
+                className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow"
+              >
                 Register
               </Link>
             </div>
           ) : (
             <div className="relative" ref={dropdownRef}>
 
+              {/* Profile Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 px-3 py-1 border rounded"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
               >
-                {/*  SAFE AVATAR */}
                 {user.image && !imgError ? (
                   <Image
                     src={user.image}
                     alt="user avatar"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
+                    width={34}
+                    height={34}
+                    className="rounded-full border"
                     onError={() => setImgError(true)}
                   />
                 ) : (
@@ -92,12 +97,12 @@ const Navbar = () => {
                     <CgProfile size={20} />
                   </div>
                 )}
-
-                <span>{user.name}</span>
+                <span className="hidden sm:block font-medium">{user.name}</span>
               </button>
 
+              {/* Dropdown */}
               {open && (
-                <div className="absolute right-0 mt-2 w-52 bg-white shadow-xl rounded-xl overflow-hidden">
+                <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-900 border shadow-xl rounded-xl overflow-hidden animate-fadeIn">
 
                   <div className="px-4 py-3 border-b">
                     <p className="font-semibold">{user.name}</p>
@@ -106,7 +111,7 @@ const Navbar = () => {
 
                   <Link
                     href="/profile"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                     onClick={() => setOpen(false)}
                   >
                     Profile
@@ -114,7 +119,7 @@ const Navbar = () => {
 
                   <Link
                     href="/my-ideas"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                     onClick={() => setOpen(false)}
                   >
                     My Ideas
@@ -122,14 +127,13 @@ const Navbar = () => {
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-500"
+                    className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500 transition"
                   >
                     <IoMdLogOut /> Logout
                   </button>
 
                 </div>
               )}
-
             </div>
           )}
         </div>
