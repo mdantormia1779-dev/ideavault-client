@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth-client"; // 🔥 FIX
 
 export default function AddIdeaPage() {
   const router = useRouter();
@@ -22,25 +23,33 @@ export default function AddIdeaPage() {
     try {
       const API = process.env.NEXT_PUBLIC_SERVER_URI;
 
+      // get user
+      const { data: session } = await authClient.getSession();
+      const user = session?.user;
+
       const res = await fetch(`${API}/ideas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          userId: user?.id || user?._id,
+        }),
       });
 
       if (!res.ok) {
         throw new Error("Request failed");
       }
 
-      toast.success("Idea added successfully ");
+      toast.success("Idea added successfully");
 
-      reset(); // clear form
-      router.push("/add-ideas");
+      reset();
 
+      router.push("/ideas"); // better UX
     } catch (err) {
-      toast.error("Failed to submit idea ");
+      toast.error("Failed to submit idea");
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -54,7 +63,7 @@ export default function AddIdeaPage() {
 
       {/* Header */}
       <div className="max-w-4xl mx-auto text-center mb-6">
-        <h1 className="text-3xl font-bold"> Add Idea</h1>
+        <h1 className="text-3xl font-bold">Add Idea</h1>
         <p className="text-gray-500">
           Share your startup idea with the world
         </p>
