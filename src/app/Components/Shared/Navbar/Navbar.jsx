@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
-  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -29,6 +29,7 @@ const Navbar = () => {
         setOpen(false);
       }
     };
+
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
@@ -39,12 +40,18 @@ const Navbar = () => {
     router.push("/login");
   };
 
+  const getInitial = (name) =>
+    name?.trim()?.charAt(0)?.toUpperCase() || "U";
+
   return (
     <header className="w-full sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b">
       <nav className="container mx-auto flex items-center justify-between px-4 py-3">
 
         {/* Logo */}
-        <Link href="/" className="text-2xl font-extrabold tracking-tight text-blue-600">
+        <Link
+          href="/"
+          className="text-2xl font-extrabold tracking-tight text-blue-600"
+        >
           IdeaVault
         </Link>
 
@@ -89,15 +96,18 @@ const Navbar = () => {
                     alt="user avatar"
                     width={34}
                     height={34}
-                    className="rounded-full border"
+                    className="rounded-full object-cover border"
                     onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                    <CgProfile size={20} />
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {getInitial(user?.name)}
                   </div>
                 )}
-                <span className="hidden sm:block font-medium">{user.name}</span>
+
+                <span className="hidden sm:block font-medium">
+                  {user.name}
+                </span>
               </button>
 
               {/* Dropdown */}
@@ -129,11 +139,13 @@ const Navbar = () => {
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500 transition"
                   >
-                    <IoMdLogOut /> Logout
+                    <IoMdLogOut />
+                    Logout
                   </button>
 
                 </div>
               )}
+
             </div>
           )}
         </div>
