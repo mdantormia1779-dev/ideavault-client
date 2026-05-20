@@ -26,15 +26,15 @@ export default function Sixitem() {
 
   if (loading) {
     return (
-      <p className="text-center mt-20 text-lg animate-pulse">
-        Loading ideas...
-      </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      
+
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold">Latest Ideas</h1>
