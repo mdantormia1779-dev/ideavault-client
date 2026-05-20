@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input, Label, Modal, Surface, TextField } from "@heroui/react";
+import { toast } from "react-toastify";
 
 const ProfileModal = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +25,7 @@ const ProfileModal = ({ user }) => {
 
     const userId = user?.id || user?._id;
 
-    await fetch(`http://localhost:5000/profile/${userId}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${userId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -32,8 +33,9 @@ const ProfileModal = ({ user }) => {
       body: JSON.stringify(form),
     });
 
-    alert("Profile updated successfully!");
+    toast("Profile updated successfully!");
     setIsOpen(false);
+    window.location.reload();
   } catch (error) {
     console.log(error);
   } finally {
