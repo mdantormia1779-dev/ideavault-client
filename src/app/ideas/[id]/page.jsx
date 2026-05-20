@@ -36,6 +36,12 @@ const IdeaDetailsPage = () => {
     if (id) fetchIdea();
   }, [id]);
 
+  useEffect(() => {
+    if (idea) {
+      const userName = user?.name || "IdeaVault User";
+      document.title = `${idea.title}`;
+    }
+  }, [idea, user]);
   // =========================
   // FETCH USER SESSION
   // =========================
@@ -75,6 +81,7 @@ const IdeaDetailsPage = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-violet-50 dark:from-slate-950 dark:to-slate-900 p-6">

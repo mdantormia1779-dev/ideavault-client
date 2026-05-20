@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { authClient } from "@/lib/auth-client"; // 🔥 FIX
+import { authClient } from "@/lib/auth-client"; //  FIX
 
 export default function AddIdeaPage() {
   const router = useRouter();

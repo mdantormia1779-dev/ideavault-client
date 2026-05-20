@@ -1,9 +1,13 @@
-"use client";
+"use client"
 
 import { useEffect, useState } from "react";
 import Card from "../Components/Card";
 
 export default function IdeasPage() {
+  useEffect(() => {
+    document.title = "Ideas Page";
+  }, []);
+
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
 
