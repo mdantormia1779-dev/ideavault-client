@@ -1,130 +1,81 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Input, Label, Modal, Surface, TextField } from "@heroui/react";
 import { toast } from "react-toastify";
 
-const ProfileModal = ({ user }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [form, setForm] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    image: user?.image || "",
-  });
-
+const ProfileModal = ({ user, setUser, onClose }) => {
+  const [name, setName] = useState(user?.name || "");
+  const [image, setImage] = useState(user?.image || "");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${user.id || user._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, image }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Profile updated successfully! 🎉");
+        
+        // ⭐ ফিক্স: প্যারেন্ট স্টেটের ইউজার ডেটা ইনস্ট্যান্ট আপডেট করা হচ্ছে
+        setUser((prev) => ({
+          ...prev,
+          name: name,
+          image: image,
+        }));
+        
+        if (onClose) onClose(); // মডাল বন্ধ করার জন্য
+      } else {
+        toast.error(data.message || "Failed to update");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = async () => {
-  try {
-    setLoading(true);
-
-    const userId = user?.id || user?._id;
-
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${userId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    toast("Profile updated successfully!");
-    setIsOpen(false);
-    window.location.reload();
-  } catch (error) {
-    console.log(error);
-  } finally {
-    setLoading(false);
-  }
-};
-
   return (
-    <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
-      
-      {/* Trigger Button */}
-      <Button
-        onPress={() => setIsOpen(true)}
-        className="w-full mt-8 h-11 font-medium rounded-2xl bg-linear-to-r from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 text-white shadow-md transition-all"
+    // আপনার মডালের ডিজাইন UI এখানে থাকবে, বাটনে onClick={handleSave} কল করে দেবেন।
+    <div className="mt-4 pt-4 border-t w-full flex flex-col gap-3">
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="border p-2 rounded-lg text-sm w-full"
+        placeholder="Update Name"
+      />
+      <input
+        type="text"
+        value={image}
+        onChange={(e) => setImage(e.target.value)}
+        className="border p-2 rounded-lg text-sm w-full"
+        placeholder="Update Image URL"
+      />
+      <button
+        onClick={handleSave}
+        disabled={loading}
+        className="bg-violet-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition cursor-pointer"
       >
-        Edit Profile
-      </Button>
-
-      <Modal.Backdrop>
-        <Modal.Container placement="auto">
-          <Modal.Dialog className="sm:max-w-md">
-
-            <Modal.CloseTrigger />
-
-            <Modal.Body className="p-6">
-              <Surface variant="default">
-                <form className="flex flex-col gap-4">
-
-                  {/* Name */}
-                  <TextField>
-                    <Label>Name</Label>
-                    <Input
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      placeholder="Enter your name"
-                      className="text-gray-800 placeholder:text-gray-400"
-                    />
-                  </TextField>
-
-                  {/* Email */}
-                  <TextField>
-                    <Label>Email</Label>
-                    <Input
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                      className="text-gray-800 placeholder:text-gray-400"
-                    />
-                  </TextField>
-
-                  {/* Image */}
-                  <TextField>
-                    <Label>Image URL</Label>
-                    <Input
-                      name="image"
-                      value={form.image}
-                      onChange={handleChange}
-                      placeholder="Enter your image url"
-                      className="text-gray-800 placeholder:text-gray-400"
-                    />
-                  </TextField>
-
-                </form>
-              </Surface>
-            </Modal.Body>
-
-            <Modal.Footer>
-              <Button
-                slot="close"
-                variant="secondary"
-              >
-                Cancel
-              </Button>
-
-              <Button
-                onPress={handleUpdate}
-                className="bg-violet-600 text-white"
-                isLoading={loading}
-              >
-                Update Profile
-              </Button>
-            </Modal.Footer>
-
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+        {loading ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
   );
 };
 
