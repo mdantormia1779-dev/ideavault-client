@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+🚀 IdeaVault – Startup Idea Sharing Platform
+🌐 Live Site
 
-## Getting Started
+📌 Project Overview
 
-First, run the development server:
+IdeaVault is a modern web-based startup idea sharing platform where users can:
 
-```bash
+Share innovative startup ideas
+Explore ideas from other users
+Comment, discuss, and give feedback
+Validate ideas through community interaction
+
+This platform focuses on idea collaboration, creativity, and validation rather than booking or scheduling.
+
+✨ Key Features
+🔐 JWT Authentication (Login / Register / Google Login)
+🧠 Create, Read, Update, Delete (CRUD) Ideas
+💬 Comment system (add, edit, delete own comments)
+🔎 Search ideas by title (case-insensitive regex)
+🎯 Filter by category & date range
+📌 My Ideas dashboard (user-specific data)
+📊 My Interactions (comment activity tracking)
+🏠 Trending ideas section (limit-based)
+🌗 Dark / Light theme toggle
+📱 Fully responsive (Mobile, Tablet, Desktop)
+⚡ Protected routes (Add Idea, My Ideas, Interactions)
+🛠️ Tech Stack
+Frontend
+Next.js (App Router)
+React Hook Form
+Tailwind CSS
+React Toastify
+Hero UI / ShadCN UI
+Context API / Hooks
+Backend
+Node.js
+Express.js
+MongoDB (Atlas)
+JWT Authentication
+Cookie-based session
+🔐 Authentication System
+JWT token generated on login
+Stored in httpOnly cookie
+Protected routes using middleware
+Supports:
+Email & Password login
+Google OAuth login
+📄 Pages Overview
+🏠 Home Page
+Banner slider (3+ slides)
+Trending ideas (6 limit)
+Explore CTA section
+💡 Ideas Page
+3-column grid layout
+Search by title (regex)
+Filter by category
+Filter by date range
+View Details button
+➕ Add Idea (Private)
+
+Users can submit startup ideas with:
+
+Title
+Short description
+Detailed description
+Category
+Tags
+Image URL
+Budget (optional)
+Target audience
+Problem & solution
+📌 Idea Details (Private)
+Full idea information
+Comment system:
+Add comment
+Edit own comment
+Delete own comment
+📂 My Ideas (Private)
+Shows user-created ideas
+Update (modal)
+Delete (confirmation modal)
+💬 My Interactions (Private)
+Shows all user comments
+Activity tracking system
+🔑 Authentication Pages
+Login page
+Register page
+Google login support
+Password validation:
+Minimum 6 characters
+Uppercase + lowercase required
+🎨 UI/UX Features
+Clean modern UI
+Consistent spacing & typography
+Uniform card design
+Responsive layout
+Toast notifications for all actions
+No lorem ipsum used
+⚙️ Backend Features
+REST API structure
+MongoDB database integration
+Secure JWT authentication
+Protected API routes
+Search & filter using MongoDB queries:
+$regex
+$gte, $lte
+🌙 Theme System
+Dark / Light mode toggle
+Persistent across pages
+Global UI support
+🚀 Deployment
+Frontend: Vercel
+Backend: Render / Railway
+MongoDB: Atlas
+📦 Installation
+Client
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Server
+npm install
+node index.js
