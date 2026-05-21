@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const ProfileModal = ({ user, setUser, onClose }) => {
+const ProfileModal = ({ user, setUser, userId, onClose }) => {
   const [name, setName] = useState(user?.name || "");
   const [image, setImage] = useState(user?.image || "");
   const [loading, setLoading] = useState(false);
@@ -14,18 +14,26 @@ const ProfileModal = ({ user, setUser, onClose }) => {
       return;
     }
 
-    const targetId = user?._id || user?.id;
+    
+    const cleanId = 
+      userId?.$oid || 
+      user?._id?.$oid || 
+      userId || 
+      user?._id || 
+      user?.id;
 
-    if (!targetId) {
+    if (!cleanId) {
       toast.error("User ID not found!");
       return;
     }
 
     setLoading(true);
     try {
-     
+  
+      const identifier = user?.email ? encodeURIComponent(user.email) : cleanId;
+
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${targetId}`,
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${identifier}`,
         {
           method: "PATCH",
           headers: {
