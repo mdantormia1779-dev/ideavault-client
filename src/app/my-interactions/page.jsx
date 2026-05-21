@@ -6,6 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 const MyInteractionPage = () => {
+   useEffect(() => {
+    document.title = "My Interactions | IdeaVault";
+  }, []);
   const [groupedData, setGroupedData] = useState({});
   const [loading, setLoading] = useState(true);
 

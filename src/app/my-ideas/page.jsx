@@ -7,6 +7,9 @@ import Image from "next/image";
 import DeleteIdea from './../Components/DeleteIdea/DeleteIdea';
 
 const MyIdeasPage = () => {
+  useEffect(() => {
+    document.title = "My Ideas";
+  }, []);
   const [ideas, setIdeas] = useState([]);
   const [user, setUser] = useState(null);
   const [selectedIdea, setSelectedIdea] = useState(null);
