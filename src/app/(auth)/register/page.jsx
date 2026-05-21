@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -9,7 +9,6 @@ import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
-
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -21,19 +20,26 @@ const RegisterPage = () => {
   } = useForm();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
 
-  //  Register Submit
+  // 🔥 Session check (important)
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await authClient.getSession();
+      if (data?.user) {
+        router.push("/"); // already logged in হলে redirect
+      }
+    };
+    checkSession();
+  }, [router]);
+
+  // ✅ Register Submit
   const onSubmit = async (formData) => {
-    console.log(" Submit clicked");
-    console.log("Form Data:", formData);
-
     const { password } = formData;
 
-    //  Password Validation
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
 
     if (!passwordRegex.test(password)) {
-      console.log(" Password validation failed");
       return toast.error(
         "Password must be 6+ characters with uppercase & lowercase"
       );
@@ -48,26 +54,34 @@ const RegisterPage = () => {
         callbackURL: "/login",
       });
 
-      console.log(" Auth Response:", response);
+      if (response?.error) {
+        return toast.error(response.error.message || "Registration failed");
+      }
 
       toast.success("Registration successful!");
       router.push("/login");
     } catch (error) {
-      console.error(" Error:", error);
+      console.error(error);
       toast.error("Registration failed!");
     }
   };
 
-  //  Google Login
+  // 🔥 Google Login FIXED
   const handleGoogleLogin = async () => {
     try {
-       const data = await authClient.signIn.social({
-    provider: "google",
-  });
-      toast.success("Google Login successful!");
-      // router.push("/");
+      setLoadingGoogle(true);
+
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/", // ✅ VERY IMPORTANT
+      });
+
+      // NOTE: redirect automatic হবে
     } catch (error) {
+      console.error(error);
       toast.error("Google login failed!");
+    } finally {
+      setLoadingGoogle(false);
     }
   };
 
@@ -88,15 +102,13 @@ const RegisterPage = () => {
             <input
               type="text"
               placeholder="Your Name"
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500"
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-500"
               {...register("name", {
                 required: "Name is required",
               })}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.name.message}
-              </p>
+              <p className="text-red-500 text-sm">{errors.name.message}</p>
             )}
           </div>
 
@@ -105,24 +117,22 @@ const RegisterPage = () => {
             <input
               type="email"
               placeholder="Email"
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500"
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-500"
               {...register("email", {
                 required: "Email is required",
               })}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
-              </p>
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
             )}
           </div>
 
-          {/* Photo URL */}
+          {/* Photo */}
           <div>
             <input
               type="text"
               placeholder="Photo URL"
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500"
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-500"
               {...register("photo")}
             />
           </div>
@@ -133,24 +143,23 @@ const RegisterPage = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                className="w-full px-4 py-3 pr-10 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                className="w-full px-4 py-3 pr-10 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-500"
                 {...register("password", {
                   required: "Password is required",
                 })}
               />
 
-              {/* 👁 Toggle */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
               >
                 {showPassword ? <FaEye /> : <FaEyeSlash />}
               </button>
             </div>
 
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-sm">
                 {errors.password.message}
               </p>
             )}
@@ -160,7 +169,7 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
+            className="w-full bg-slate-900 text-white py-3 rounded-lg"
           >
             {isSubmitting ? "Creating..." : "Register"}
           </button>
@@ -175,11 +184,11 @@ const RegisterPage = () => {
           {/* Google Login */}
           <Button
             onClick={handleGoogleLogin}
-            className="w-full rounded-lg flex items-center justify-center gap-2"
-            variant="tertiary"
+            disabled={loadingGoogle}
+            className="w-full flex items-center justify-center gap-2"
           >
             <Icon icon="devicon:google" />
-            Sign in with Google
+            {loadingGoogle ? "Redirecting..." : "Sign in with Google"}
           </Button>
         </form>
 
