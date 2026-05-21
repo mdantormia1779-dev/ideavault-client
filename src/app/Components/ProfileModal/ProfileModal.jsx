@@ -1,105 +1,147 @@
 "use client";
 
 import { useState } from "react";
+import { Button, Input, Label, Modal, Surface, TextField } from "@heroui/react";
 import { toast } from "react-toastify";
 
-const ProfileModal = ({ user, setUser, userId, onClose }) => {
-  const [name, setName] = useState(user?.name || "");
-  const [image, setImage] = useState(user?.image || "");
+const ProfileModal = ({ user, setUser }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [form, setForm] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    image: user?.image || "",
+  });
+
   const [loading, setLoading] = useState(false);
 
-  const handleSave = async () => {
-    if (!name.trim()) {
-      toast.error("Name cannot be empty");
-      return;
-    }
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    
-    const cleanId = 
-      userId?.$oid || 
-      user?._id?.$oid || 
-      userId || 
-      user?._id || 
-      user?.id;
-
-    if (!cleanId) {
-      toast.error("User ID not found!");
-      return;
-    }
-
-    setLoading(true);
+  const handleUpdate = async () => {
     try {
-  
-      const identifier = user?.email ? encodeURIComponent(user.email) : cleanId;
+      setLoading(true);
+
+      const userId = user?.id || user?._id;
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${identifier}`,
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${userId}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            name, 
-            image,
-            email: user?.email 
+          body: JSON.stringify({
+            name: form.name,
+            image: form.image,
           }),
         }
       );
 
       const data = await res.json();
 
-      if (data.success) {
-        toast.success("Profile updated successfully! 🎉");
-      
-        setUser((prev) => ({
-          ...prev,
-          name: name,
-          image: image,
-        }));
-        
-        if (onClose) onClose();
-      } else {
-        toast.error(data.message || "Failed to update");
+      if (!data.success) {
+        toast.error(data.message || "Update failed");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error occurred");
+
+      // 🔥 update UI without reload
+      setUser({
+        ...user,
+        name: form.name,
+        image: form.image,
+      });
+
+      toast.success("Profile updated successfully!");
+      setIsOpen(false);
+
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="mt-4 pt-4 border-t w-full flex flex-col gap-3">
-      <div>
-        <label className="text-xs font-semibold text-gray-500 block mb-1">Name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border p-2 rounded-lg text-sm w-full focus:outline-violet-500"
-          placeholder="Update Name"
-        />
-      </div>
-      <div>
-        <label className="text-xs font-semibold text-gray-500 block mb-1">Image URL</label>
-        <input
-          type="text"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-          className="border p-2 rounded-lg text-sm w-full focus:outline-violet-500"
-          placeholder="Update Image URL"
-        />
-      </div>
-      <button
-        onClick={handleSave}
-        disabled={loading}
-        className="bg-violet-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition cursor-pointer disabled:bg-violet-400"
+    <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
+      
+      {/* Trigger Button */}
+      <Button
+        onPress={() => setIsOpen(true)}
+        className="w-full mt-8 h-11 font-medium rounded-2xl bg-linear-to-r from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 text-white shadow-md transition-all"
       >
-        {loading ? "Saving..." : "Save Changes"}
-      </button>
-    </div>
+        Edit Profile
+      </Button>
+
+      <Modal.Backdrop>
+        <Modal.Container placement="auto">
+          <Modal.Dialog className="sm:max-w-md">
+
+            <Modal.CloseTrigger />
+
+            <Modal.Body className="p-6">
+              <Surface variant="default">
+                <form className="flex flex-col gap-4">
+
+                  {/* Name */}
+                  <TextField>
+                    <Label>Name</Label>
+                    <Input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="Enter your name"
+                      className="text-gray-800 placeholder:text-gray-400"
+                    />
+                  </TextField>
+
+                  {/* Email (disabled - safe fix) */}
+                  <TextField>
+                    <Label>Email</Label>
+                    <Input
+                      name="email"
+                      value={form.email}
+                      disabled
+                      className="text-gray-800 placeholder:text-gray-400"
+                    />
+                  </TextField>
+
+                  {/* Image */}
+                  <TextField>
+                    <Label>Image URL</Label>
+                    <Input
+                      name="image"
+                      value={form.image}
+                      onChange={handleChange}
+                      placeholder="Enter your image url"
+                      className="text-gray-800 placeholder:text-gray-400"
+                    />
+                  </TextField>
+
+                </form>
+              </Surface>
+            </Modal.Body>
+
+            <Modal.Footer>
+              <Button slot="close" variant="secondary">
+                Cancel
+              </Button>
+
+              <Button
+                onPress={handleUpdate}
+                className="bg-violet-600 text-white"
+                isLoading={loading}
+              >
+                Update Profile
+              </Button>
+            </Modal.Footer>
+
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
   );
 };
 
