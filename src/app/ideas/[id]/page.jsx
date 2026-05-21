@@ -5,8 +5,6 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Comments from "@/app/Components/Comments/Comments";
 import { authClient } from "@/lib/auth-client";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 const IdeaDetailsPage = () => {
   const { id } = useParams();
