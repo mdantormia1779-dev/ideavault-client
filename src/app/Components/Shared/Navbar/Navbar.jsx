@@ -9,41 +9,45 @@ import { IoMdLogOut, IoMdMenu, IoMdClose } from "react-icons/io";
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
-  const [open, setOpen] = useState(false);       // Profile Dropdown State
-  const [menuOpen, setMenuOpen] = useState(false); // Mobile Hamburger Menu State
+  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
-  
+
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  // 1. Fetch Session Data & Safely Reset Image Error State (ESLint Error Fixed Here)
+  // session
   useEffect(() => {
     const fetchSession = async () => {
       try {
         const { data } = await authClient.getSession();
         setUser(data?.user || null);
-        setImgError(false); // Reset error state safely inside the async callback flow
-      } catch (error) {
-        console.error("Navbar session fetch error:", error);
+        setImgError(false);
+      } catch (err) {
+        console.log(err);
       }
     };
-    
-    fetchSession();
 
-    // Custom event listener to update user data in real-time when profile updates
+    fetchSession();
     window.addEventListener("profileUpdated", fetchSession);
-    return () => window.removeEventListener("profileUpdated", fetchSession);
+
+    return () =>
+      window.removeEventListener("profileUpdated", fetchSession);
   }, [pathname]);
 
-  // 2. Handle Click Outside to close dropdown and mobile drawer
+  // outside click
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
       }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target) && !e.target.closest(".hamburger-btn")) {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(e.target) &&
+        !e.target.closest(".hamburger-btn")
+      ) {
         setMenuOpen(false);
       }
     };
@@ -53,176 +57,129 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = async () => {
-    try {
-      await authClient.signOut();
-      setUser(null);
-      setOpen(false);
-      setMenuOpen(false);
-      router.push("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    await authClient.signOut();
+    setUser(null);
+    router.push("/login");
   };
 
-  const getInitial = (name) => name?.trim()?.charAt(0)?.toUpperCase() || "U";
+  const getInitial = (name) =>
+    name?.trim()?.charAt(0)?.toUpperCase() || "U";
 
-  // Filter conditions for invalid or broken user avatar paths
-  const isInvalidImage = !user?.image || user?.image.includes("://png.com") || user?.image === "";
+  const isInvalidImage =
+    !user?.image || user?.image.includes("://png.com");
 
-  // Dynamic style layout matching for the currently active link
-  const linkClass = (path) => 
-    pathname === path 
-      ? "text-blue-600 dark:text-blue-400 font-extrabold" 
-      : "hover:text-blue-600 dark:hover:text-blue-400 transition duration-200";
+  const linkClass = (path) =>
+    pathname === path
+      ? "text-blue-600 font-bold"
+      : "hover:text-blue-600 transition";
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-      <nav className="container mx-auto flex items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+      <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
 
-        {/* LOGO & MOBILE HAMBURGER */}
+        {/* LEFT */}
         <div className="flex items-center gap-3">
-          {/* Hamburger Icon button for smaller displays */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="hamburger-btn md:hidden text-2xl text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer"
+            className="hamburger-btn md:hidden text-2xl"
           >
             {menuOpen ? <IoMdClose /> : <IoMdMenu />}
           </button>
-          
-          <Link
-            href="/"
-            className="text-2xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400"
-          >
+
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">
             IdeaVault
           </Link>
         </div>
 
-        {/* DESKTOP MENU (Hidden on small mobile viewports) */}
-        <ul className="hidden md:flex items-center gap-6 font-bold text-gray-700 dark:text-gray-200 text-sm lg:text-base">
+        {/* DESKTOP MENU */}
+        <ul className="hidden md:flex items-center gap-5 lg:gap-6 text-sm lg:text-base font-medium">
           <li><Link href="/" className={linkClass("/")}>Home</Link></li>
           <li><Link href="/ideas" className={linkClass("/ideas")}>Ideas</Link></li>
           <li><Link href="/add-ideas" className={linkClass("/add-ideas")}>Add Idea</Link></li>
           <li><Link href="/my-ideas" className={linkClass("/my-ideas")}>My Ideas</Link></li>
-          <li><Link href="/my-interactions" className={linkClass("/my-interactions")}>My Interactions</Link></li>
         </ul>
 
-        {/* RIGHT SIDE ACTIONS (LOGIN / REGISTER / USER AVATAR DROPDOWN) */}
-        <div className="flex items-center gap-3">
+        {/* RIGHT */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {!user ? (
-            <div className="flex gap-2">
-              <Link
-                href="/login"
-                className="px-3.5 py-1.5 text-sm font-medium border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-              >
+            <>
+              <Link href="/login" className="text-sm px-3 py-1.5 border rounded">
                 Login
               </Link>
-              <Link
-                href="/register"
-                className="px-3.5 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-xs"
-              >
+              <Link href="/register" className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded">
                 Register
               </Link>
-            </div>
+            </>
           ) : (
-            <div className="relative" ref={dropdownRef}>
+            <div ref={dropdownRef} className="relative">
 
-              {/* PROFILE TRIGGER BUTTON */}
               <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border border-transparent hover:border-gray-200"
+                className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-gray-100"
               >
+                {/* avatar */}
                 {!isInvalidImage && !imgError ? (
                   <div className="relative w-8 h-8">
                     <Image
                       src={user.image}
-                      alt="user avatar"
+                      alt="avatar"
                       fill
-                      sizes="34px"
                       className="rounded-full object-cover"
                       onError={() => setImgError(true)}
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                    {getInitial(user?.name)}
+                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+                    {getInitial(user.name)}
                   </div>
                 )}
 
-                <span className="hidden sm:block font-semibold text-sm max-w-25 truncate text-gray-800 dark:text-gray-200">
+                {/* name hide on mobile */}
+                <span className="hidden sm:block text-sm font-medium max-w-25 truncate">
                   {user.name}
                 </span>
               </button>
 
-              {/* DESKTOP PROFILE DROPDOWN PANEL */}
+              {/* dropdown */}
               {open && (
-                <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-900 border dark:border-gray-800 shadow-2xl rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-4 py-3 bg-slate-50 dark:bg-gray-800/50 border-b dark:border-gray-800">
-                    <p className="font-bold text-gray-800 dark:text-gray-200 truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+                <div className="absolute right-0 mt-2 w-52 bg-white shadow-xl rounded-xl border">
+                  <div className="p-3 border-b">
+                    <p className="font-semibold truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
 
-                  <div className="p-1">
-                    <Link
-                      href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
-                      onClick={() => setOpen(false)}
-                    >
-                      My Profile
-                    </Link>
+                  <Link href="/profile" className="block px-4 py-2 hover:bg-gray-100">
+                    Profile
+                  </Link>
 
-                    <Link
-                      href="/my-ideas"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
-                      onClick={() => setOpen(false)}
-                    >
-                      My Ideas
-                    </Link>
-                  </div>
-
-                  <div className="border-t dark:border-gray-800 p-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 text-rose-500 rounded-lg transition cursor-pointer font-medium"
-                    >
-                      <IoMdLogOut className="text-base" />
-                      Logout
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <IoMdLogOut />
+                    Logout
+                  </button>
                 </div>
               )}
-
             </div>
           )}
         </div>
       </nav>
 
-      {/* MOBILE DRAWER SIDEBAR MENU (Slides out smoothly when clicking hamburger button) */}
+      {/* MOBILE DRAWER */}
       <div
         ref={mobileMenuRef}
-        className={`fixed top-14.25 left-0 h-[calc(100vh-57px)] w-64 bg-white dark:bg-gray-900 border-r dark:border-gray-800 shadow-2xl transition-transform duration-300 transform md:hidden ${
+        className={`fixed top-15 left-0 w-64 h-[calc(100vh-60px)] bg-white shadow-lg transform transition-transform duration-300 md:hidden ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <ul className="flex flex-col p-4 gap-4 font-bold text-gray-700 dark:text-gray-200 text-base">
-          <li>
-            <Link href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>Home</Link>
-          </li>
-          <li>
-            <Link href="/ideas" className={linkClass("/ideas")} onClick={() => setMenuOpen(false)}>Ideas</Link>
-          </li>
-          <li>
-            <Link href="/add-ideas" className={linkClass("/add-ideas")} onClick={() => setMenuOpen(false)}>Add Idea</Link>
-          </li>
-          <li>
-            <Link href="/my-ideas" className={linkClass("/my-ideas")} onClick={() => setMenuOpen(false)}>My Ideas</Link>
-          </li>
-          <li>
-            <Link href="/my-interactions" className={linkClass("/my-interactions")} onClick={() => setMenuOpen(false)}>My Interactions</Link>
-          </li>
+        <ul className="flex flex-col p-4 gap-4 font-medium">
+          <li><Link href="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
+          <li><Link href="/ideas" onClick={() => setMenuOpen(false)}>Ideas</Link></li>
+          <li><Link href="/add-ideas" onClick={() => setMenuOpen(false)}>Add Idea</Link></li>
+          <li><Link href="/my-ideas" onClick={() => setMenuOpen(false)}>My Ideas</Link></li>
           {user && (
-            <li className="border-t dark:border-gray-800 pt-4">
-              <Link href="/profile" className={linkClass("/profile")} onClick={() => setMenuOpen(false)}>My Profile</Link>
-            </li>
+            <li><Link href="/profile" onClick={() => setMenuOpen(false)}>Profile</Link></li>
           )}
         </ul>
       </div>
