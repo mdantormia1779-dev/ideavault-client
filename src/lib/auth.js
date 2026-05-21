@@ -1,11 +1,19 @@
-import dns from 'node:dns';
-dns.setServers(['8.8.8.8', '8.8.4.4']);
+import dns from "node:dns";
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
 const uri = process.env.DB_URI;
+
+if (!uri) {
+  throw new Error("DB_URI missing");
+}
+
+/* ======================
+   MONGO CONNECTION (SAFE)
+====================== */
 
 let client;
 let clientPromise;
@@ -17,11 +25,13 @@ if (!global._mongoClientPromise) {
 
 clientPromise = global._mongoClientPromise;
 
-const db = (await clientPromise).db("idea_vault");
+/* ======================
+   AUTH EXPORT
+====================== */
 
 export const auth = betterAuth({
-  database: mongodbAdapter(db, {
-    client: await clientPromise,
+  database: mongodbAdapter(clientPromise, {
+    dbName: "idea_vault",
   }),
 
   emailAndPassword: {
@@ -43,4 +53,10 @@ export const auth = betterAuth({
       },
     },
   },
+
+  //  VERY IMPORTANT FOR YOUR ERROR
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://ideavault-client-tawny.vercel.app",
+  ],
 });
