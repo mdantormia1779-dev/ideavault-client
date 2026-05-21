@@ -14,16 +14,28 @@ const ProfileModal = ({ user, setUser, onClose }) => {
       return;
     }
 
+    const targetId = user?._id || user?.id;
+
+    if (!targetId) {
+      toast.error("User ID not found!");
+      return;
+    }
+
     setLoading(true);
     try {
+     
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${user.id || user._id}`,
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/profile/${targetId}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name, image }),
+          body: JSON.stringify({ 
+            name, 
+            image,
+            email: user?.email 
+          }),
         }
       );
 
@@ -31,15 +43,14 @@ const ProfileModal = ({ user, setUser, onClose }) => {
 
       if (data.success) {
         toast.success("Profile updated successfully! 🎉");
-        
-        // ⭐ ফিক্স: প্যারেন্ট স্টেটের ইউজার ডেটা ইনস্ট্যান্ট আপডেট করা হচ্ছে
+      
         setUser((prev) => ({
           ...prev,
           name: name,
           image: image,
         }));
         
-        if (onClose) onClose(); // মডাল বন্ধ করার জন্য
+        if (onClose) onClose();
       } else {
         toast.error(data.message || "Failed to update");
       }
@@ -52,26 +63,31 @@ const ProfileModal = ({ user, setUser, onClose }) => {
   };
 
   return (
-    // আপনার মডালের ডিজাইন UI এখানে থাকবে, বাটনে onClick={handleSave} কল করে দেবেন।
     <div className="mt-4 pt-4 border-t w-full flex flex-col gap-3">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded-lg text-sm w-full"
-        placeholder="Update Name"
-      />
-      <input
-        type="text"
-        value={image}
-        onChange={(e) => setImage(e.target.value)}
-        className="border p-2 rounded-lg text-sm w-full"
-        placeholder="Update Image URL"
-      />
+      <div>
+        <label className="text-xs font-semibold text-gray-500 block mb-1">Name</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border p-2 rounded-lg text-sm w-full focus:outline-violet-500"
+          placeholder="Update Name"
+        />
+      </div>
+      <div>
+        <label className="text-xs font-semibold text-gray-500 block mb-1">Image URL</label>
+        <input
+          type="text"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+          className="border p-2 rounded-lg text-sm w-full focus:outline-violet-500"
+          placeholder="Update Image URL"
+        />
+      </div>
       <button
         onClick={handleSave}
         disabled={loading}
-        className="bg-violet-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition cursor-pointer"
+        className="bg-violet-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition cursor-pointer disabled:bg-violet-400"
       >
         {loading ? "Saving..." : "Save Changes"}
       </button>

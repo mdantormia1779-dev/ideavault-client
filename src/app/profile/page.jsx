@@ -75,7 +75,11 @@ const ProfilePage = () => {
         </div>
 
         {/* ✅ IMPORTANT: setUser pass */}
-        <ProfileModal user={user} setUser={setUser} />
+        <ProfileModal
+          user={user}
+          setUser={setUser}
+          userId={user._id || user.id}
+        />
       </div>
     </div>
   );
