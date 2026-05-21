@@ -11,7 +11,7 @@ export default function Sixitem() {
     const fetchIdeas = async () => {
       try {
         const API = process.env.NEXT_PUBLIC_SERVER_URI;
-        const res = await fetch(`${API}/idea`);
+        const res = await fetch(`${API}/ideas/limit`);
         const data = await res.json();
         setIdeas(data.data);
       } catch (error) {
