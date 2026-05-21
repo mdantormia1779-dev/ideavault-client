@@ -20,12 +20,7 @@ const IdeaDetailsPage = () => {
     const fetchIdea = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URI}/ideas/${id}`,{
-            headers: {
-              authorization: "logged in"
-            }
-          }
-        );
+          `${process.env.NEXT_PUBLIC_SERVER_URI}/ideas/${id}`);
 
         const data = await res.json();
         setIdea(data?.data || null);
