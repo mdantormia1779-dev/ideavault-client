@@ -5,10 +5,11 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Comments from "@/app/Components/Comments/Comments";
 import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 const IdeaDetailsPage = () => {
   const { id } = useParams();
-
   const [idea, setIdea] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,11 @@ const IdeaDetailsPage = () => {
     const fetchIdea = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URI}/ideas/${id}`
+          `${process.env.NEXT_PUBLIC_SERVER_URI}/ideas/${id}`,{
+            headers: {
+              authorization: "logged in"
+            }
+          }
         );
 
         const data = await res.json();
