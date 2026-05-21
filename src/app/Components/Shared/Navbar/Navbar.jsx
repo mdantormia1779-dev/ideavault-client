@@ -18,7 +18,7 @@ const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // session
+  // Session handling
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -37,7 +37,7 @@ const Navbar = () => {
       window.removeEventListener("profileUpdated", fetchSession);
   }, [pathname]);
 
-  // outside click
+  // Outside click handler
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -59,14 +59,17 @@ const Navbar = () => {
   const handleLogout = async () => {
     await authClient.signOut();
     setUser(null);
+    setOpen(false);
+    setMenuOpen(false);
     router.push("/login");
   };
 
   const getInitial = (name) =>
     name?.trim()?.charAt(0)?.toUpperCase() || "U";
 
+  // Check for invalid domain fallbacks
   const isInvalidImage =
-    !user?.image || user?.image.includes("://png.com");
+    !user?.image || user?.image.includes("antor.png.com") || user?.image === "";
 
   const linkClass = (path) =>
     pathname === path
@@ -74,14 +77,14 @@ const Navbar = () => {
       : "hover:text-blue-600 transition";
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
-      <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b h-14 flex items-center">
+      <nav className="max-w-7xl w-full mx-auto flex items-center justify-between px-4">
 
-        {/* LEFT */}
+        {/* LEFT BRAND SECTION */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="hamburger-btn md:hidden text-2xl"
+            className="hamburger-btn md:hidden text-2xl flex items-center justify-center p-1 hover:bg-gray-100 rounded-md"
           >
             {menuOpen ? <IoMdClose /> : <IoMdMenu />}
           </button>
@@ -91,7 +94,7 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* DESKTOP MENU */}
+        {/* DESKTOP LINKS */}
         <ul className="hidden md:flex items-center gap-5 lg:gap-6 text-sm lg:text-base font-medium">
           <li><Link href="/" className={linkClass("/")}>Home</Link></li>
           <li><Link href="/ideas" className={linkClass("/ideas")}>Ideas</Link></li>
@@ -99,7 +102,7 @@ const Navbar = () => {
           <li><Link href="/my-ideas" className={linkClass("/my-ideas")}>My Ideas</Link></li>
         </ul>
 
-        {/* RIGHT */}
+        {/* RIGHT ACTION CONTROLS */}
         <div className="flex items-center gap-2 sm:gap-3">
           {!user ? (
             <>
@@ -117,7 +120,7 @@ const Navbar = () => {
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-gray-100"
               >
-                {/* avatar */}
+                {/* Avatar Display */}
                 {!isInvalidImage && !imgError ? (
                   <div className="relative w-8 h-8">
                     <Image
@@ -129,26 +132,26 @@ const Navbar = () => {
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
                     {getInitial(user.name)}
                   </div>
                 )}
 
-                {/* name hide on mobile */}
+                {/* Name string element */}
                 <span className="hidden sm:block text-sm font-medium max-w-25 truncate">
                   {user.name}
                 </span>
               </button>
 
-              {/* dropdown */}
+              {/* Desktop Menu Dropdown element */}
               {open && (
-                <div className="absolute right-0 mt-2 w-52 bg-white shadow-xl rounded-xl border">
+                <div className="absolute right-0 mt-2 w-52 bg-white shadow-xl rounded-xl border z-50">
                   <div className="p-3 border-b">
                     <p className="font-semibold truncate">{user.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
 
-                  <Link href="/profile" className="block px-4 py-2 hover:bg-gray-100">
+                  <Link href="/profile" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setOpen(false)}>
                     Profile
                   </Link>
 
@@ -166,20 +169,20 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* MOBILE DRAWER */}
+      {/* MOBILE DRAWER (Fixed top alignment issue) */}
       <div
         ref={mobileMenuRef}
-        className={`fixed top-15 left-0 w-64 h-[calc(100vh-60px)] bg-white shadow-lg transform transition-transform duration-300 md:hidden ${
+        className={`fixed top-14 left-0 w-64 h-[calc(100vh-56px)] bg-white border-r shadow-lg transform transition-transform duration-300 md:hidden z-40 ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <ul className="flex flex-col p-4 gap-4 font-medium">
-          <li><Link href="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
-          <li><Link href="/ideas" onClick={() => setMenuOpen(false)}>Ideas</Link></li>
-          <li><Link href="/add-ideas" onClick={() => setMenuOpen(false)}>Add Idea</Link></li>
-          <li><Link href="/my-ideas" onClick={() => setMenuOpen(false)}>My Ideas</Link></li>
+        <ul className="flex flex-col p-4 gap-4 font-medium text-gray-700">
+          <li><Link href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>Home</Link></li>
+          <li><Link href="/ideas" className={linkClass("/ideas")} onClick={() => setMenuOpen(false)}>Ideas</Link></li>
+          <li><Link href="/add-ideas" className={linkClass("/add-ideas")} onClick={() => setMenuOpen(false)}>Add Idea</Link></li>
+          <li><Link href="/my-ideas" className={linkClass("/my-ideas")} onClick={() => setMenuOpen(false)}>My Ideas</Link></li>
           {user && (
-            <li><Link href="/profile" onClick={() => setMenuOpen(false)}>Profile</Link></li>
+            <li className="pt-2 border-t"><Link href="/profile" className={linkClass("/profile")} onClick={() => setMenuOpen(false)}>Profile</Link></li>
           )}
         </ul>
       </div>
