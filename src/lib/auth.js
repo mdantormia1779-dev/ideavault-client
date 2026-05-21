@@ -1,62 +1,22 @@
-import dns from "node:dns";
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
-const uri = process.env.DB_URI;
-
-if (!uri) {
-  throw new Error("DB_URI missing");
-}
-
-/* ======================
-   MONGO CONNECTION (SAFE)
-====================== */
-
-let client;
-let clientPromise;
-
-if (!global._mongoClientPromise) {
-  client = new MongoClient(uri);
-  global._mongoClientPromise = client.connect();
-}
-
-clientPromise = global._mongoClientPromise;
-
-/* ======================
-   AUTH EXPORT
-====================== */
+const client = new MongoClient(process.env.DB_URI);
+const db = client.db("idea_vault");
 
 export const auth = betterAuth({
-  database: mongodbAdapter(clientPromise, {
-    dbName: "idea_vault",
+  database: mongodbAdapter(db, {
+    // Optional: if you don't provide a client, database transactions won't be enabled.
+    client
   }),
-
-  emailAndPassword: {
-    enabled: true,
-  },
-
+  emailAndPassword: { 
+    enabled: true, 
+  }, 
   socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
+        }, 
     },
-  },
-
-  user: {
-    additionalFields: {
-      image: {
-        type: "string",
-        required: false,
-      },
-    },
-  },
-
-  //  VERY IMPORTANT FOR YOUR ERROR
-  trustedOrigins: [
-    "http://localhost:3000",
-    "https://ideavault-client-tawny.vercel.app",
-  ],
 });
