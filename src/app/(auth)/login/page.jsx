@@ -23,7 +23,7 @@ const LoginPage = () => {
 
   //  Handle Login
   const onSubmit = async (formData) => {
-    console.log("🔥 Login Data:", formData);
+    console.log("Login Data:", formData);
 
     try {
       const res = await authClient.signIn.email({
