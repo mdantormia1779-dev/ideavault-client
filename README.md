@@ -1,121 +1,101 @@
 🚀 IdeaVault – Startup Idea Sharing Platform
-🌐 Live Site
 
-📌 Project Overview
+🔗 Live Site: https://ideavault-client-eight.vercel.app/
+🖥️ Client Repo: https://github.com/mdantormia1779-dev/ideavault-client
+🗄️ Server Repo: https://github.com/mdantormia1779-dev/ideavault-server
 
-IdeaVault is a modern web-based startup idea sharing platform where users can:
+📌 About the Project
 
-Share innovative startup ideas
-Explore ideas from other users
-Comment, discuss, and give feedback
-Validate ideas through community interaction
-
-This platform focuses on idea collaboration, creativity, and validation rather than booking or scheduling.
+IdeaVault is a modern startup idea sharing platform where users can publish innovative startup concepts, explore ideas from others, and engage through comments and discussions. The platform is designed to encourage collaboration, validation, and improvement of startup ideas through community feedback.
 
 ✨ Key Features
-🔐 JWT Authentication (Login / Register / Google Login)
-🧠 Create, Read, Update, Delete (CRUD) Ideas
-💬 Comment system (add, edit, delete own comments)
-🔎 Search ideas by title (case-insensitive regex)
-🎯 Filter by category & date range
-📌 My Ideas dashboard (user-specific data)
-📊 My Interactions (comment activity tracking)
-🏠 Trending ideas section (limit-based)
-🌗 Dark / Light theme toggle
-📱 Fully responsive (Mobile, Tablet, Desktop)
-⚡ Protected routes (Add Idea, My Ideas, Interactions)
-🛠️ Tech Stack
-Frontend
-Next.js (App Router)
-React Hook Form
-Tailwind CSS
-React Toastify
-Hero UI / ShadCN UI
-Context API / Hooks
-Backend
-Node.js
-Express.js
-MongoDB (Atlas)
-JWT Authentication
-Cookie-based session
+🧠 Users can create, update, and delete startup ideas
+💬 Interactive comment system for idea validation and discussion
+🔐 Secure authentication system using JWT (Email/Password + Google Login)
+📊 Trending ideas section based on engagement and recency
+🔍 Search and filter ideas by title and category
+🌙 Dark/Light theme toggle for better user experience
+👤 User profile management with update functionality
+📱 Fully responsive design for mobile, tablet, and desktop
+⚡ Optimized routing with protected private routes
+🧩 Main Pages
+Home (Public)
+Ideas (Public)
+Add Idea (Private)
+Idea Details (Private)
+My Ideas (Private)
+My Interactions (Private)
+Authentication (Login/Register)
+Profile Management
+404 Not Found Page
 🔐 Authentication System
-JWT token generated on login
-Stored in httpOnly cookie
-Protected routes using middleware
-Supports:
-Email & Password login
-Google OAuth login
-📄 Pages Overview
-🏠 Home Page
-Banner slider (3+ slides)
-Trending ideas (6 limit)
-Explore CTA section
-💡 Ideas Page
-3-column grid layout
-Search by title (regex)
-Filter by category
-Filter by date range
-View Details button
-➕ Add Idea (Private)
+JWT-based authentication
+Secure login and registration
+Google OAuth login support
+Protected routes for authenticated users
+Persistent login state on page reload
+💡 Idea Management
 
-Users can submit startup ideas with:
+Each idea includes:
 
-Title
-Short description
-Detailed description
-Category
-Tags
+Title & Description
+Category & Tags
+Problem & Solution
+Target Audience
+Estimated Budget (optional)
 Image URL
-Budget (optional)
-Target audience
-Problem & solution
-📌 Idea Details (Private)
-Full idea information
-Comment system:
-Add comment
-Edit own comment
-Delete own comment
-📂 My Ideas (Private)
-Shows user-created ideas
-Update (modal)
-Delete (confirmation modal)
-💬 My Interactions (Private)
-Shows all user comments
-Activity tracking system
-🔑 Authentication Pages
-Login page
-Register page
-Google login support
-Password validation:
-Minimum 6 characters
-Uppercase + lowercase required
+
+Users can:
+
+Create new ideas
+Edit their own ideas
+Delete their own ideas
+View full idea details
+💬 Interaction System
+Add comments on ideas
+Edit and delete own comments
+View timestamped discussions
+Track user activity in “My Interactions”
+🔎 Search & Filter
+Search ideas by title (case-insensitive)
+Filter by category
+Optional date range filtering
+MongoDB $regex, $gte, $lte used for querying
 🎨 UI/UX Features
-Clean modern UI
-Consistent spacing & typography
-Uniform card design
-Responsive layout
+Modern and clean UI design
+Consistent typography and spacing
+Equal-sized responsive cards
 Toast notifications for all actions
-No lorem ipsum used
-⚙️ Backend Features
-REST API structure
-MongoDB database integration
-Secure JWT authentication
-Protected API routes
-Search & filter using MongoDB queries:
-$regex
-$gte, $lte
-🌙 Theme System
-Dark / Light mode toggle
-Persistent across pages
-Global UI support
+Loading spinner for async operations
+No Lorem Ipsum used anywhere
+📱 Responsive Design
+
+Fully responsive for:
+
+Mobile devices
+Tablets
+Desktop screens
+⚙️ Tech Stack
+Next.js (Frontend)
+React.js
+Node.js (Backend)
+Express.js
+MongoDB
+JWT Authentication
+Tailwind CSS / UI Library
+Vercel (Deployment)
 🚀 Deployment
 Frontend: Vercel
-Backend: Render / Railway
-MongoDB: Atlas
-📦 Installation
-Client
-npm install
-npm run dev
-Server
-npm install
-node index.js
+Backend: Render / Custom Hosting
+📄 Project Requirements Compliance
+✔ 15+ meaningful client-side commits
+✔ 8+ meaningful server-side commits
+✔ Fully functional CRUD system
+✔ Protected routes implemented
+✔ Dynamic routing with no reload errors
+✔ Custom 404 page
+✔ Toast notifications instead of alerts
+✔ No Lorem Ipsum used
+👨‍💻 Developer
+
+Md Antor Mia
