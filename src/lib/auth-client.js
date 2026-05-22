@@ -5,4 +5,4 @@ export const authClient = createAuthClient({
 });
 
 // single source export (IMPORTANT)
-export const { signIn, signUp, useSession } = authClient;
+export const { signIn, signUp, useSession } = createAuthClient()

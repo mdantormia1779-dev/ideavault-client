@@ -4,14 +4,15 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { authClient } from "@/lib/auth-client"; //  FIX
+import { authClient } from "@/lib/auth-client";
 
 export default function AddIdeaPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     document.title = "Add Idea | IdeaVault";
   }, []);
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -20,39 +21,64 @@ export default function AddIdeaPage() {
     reset,
   } = useForm();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (formData) => {
     setLoading(true);
 
     try {
       const API = process.env.NEXT_PUBLIC_SERVER_URI;
 
-      // get user
-      const { data: session } = await authClient.getSession();
+      if (!API) {
+        throw new Error("API URL missing");
+      }
+
+      // ✅ FIXED SESSION HANDLING
+      const sessionRes = await authClient.getSession();
+      const session = sessionRes?.data?.user
+        ? sessionRes.data
+        : sessionRes?.data || sessionRes;
+
       const user = session?.user;
 
+      if (!user) {
+        toast.error("Please login first!");
+        router.push("/login");
+        return;
+      }
+
+      // ✅ IMPORTANT: NO userId SENT (backend handles it)
       const res = await fetch(`${API}/ideas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 🔥 IMPORTANT for auth cookies
         body: JSON.stringify({
-          ...data,
-          userId: user?.id || user?._id,
+          title: formData.title,
+          shortDesc: formData.shortDesc,
+          description: formData.description,
+          category: formData.category,
+          tags: formData.tags,
+          image: formData.image,
+          budget: formData.budget,
+          audience: formData.audience,
+          problem: formData.problem,
+          solution: formData.solution,
         }),
       });
 
+      const result = await res.json();
+
       if (!res.ok) {
-        throw new Error("Request failed");
+        throw new Error(result?.message || "Failed to submit idea");
       }
 
-      toast.success("Idea added successfully");
+      toast.success("Idea added successfully 🎉");
 
       reset();
-
-      router.push("/ideas"); // better UX
-    } catch (err) {
-      toast.error("Failed to submit idea");
-      console.log(err);
+      router.push("/ideas");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -78,46 +104,28 @@ export default function AddIdeaPage() {
         className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-2xl shadow grid md:grid-cols-2 gap-4"
       >
 
-        {/* Title */}
-        <div>
-          <input
-            {...register("title", { required: "Title is required" })}
-            placeholder="Idea Title"
-            className={input}
-          />
-          <p className="text-red-500 text-sm">
-            {errors.title?.message}
-          </p>
-        </div>
+        <input
+          {...register("title", { required: "Title is required" })}
+          placeholder="Idea Title"
+          className={input}
+        />
+        <p className="text-red-500 text-sm">{errors.title?.message}</p>
 
-        {/* Short Desc */}
-        <div>
-          <input
-            {...register("shortDesc", { required: "Short description required" })}
-            placeholder="Short Description"
-            className={input}
-          />
-          <p className="text-red-500 text-sm">
-            {errors.shortDesc?.message}
-          </p>
-        </div>
+        <input
+          {...register("shortDesc", { required: "Short description required" })}
+          placeholder="Short Description"
+          className={input}
+        />
+        <p className="text-red-500 text-sm">{errors.shortDesc?.message}</p>
 
-        {/* Description */}
-        <div className="md:col-span-2">
-          <textarea
-            {...register("description", {
-              required: "Description is required",
-            })}
-            placeholder="Detailed Description"
-            className={input}
-            rows="3"
-          />
-          <p className="text-red-500 text-sm">
-            {errors.description?.message}
-          </p>
-        </div>
+        <textarea
+          {...register("description", { required: "Description is required" })}
+          placeholder="Detailed Description"
+          className={`${input} md:col-span-2`}
+          rows="3"
+        />
+        <p className="text-red-500 text-sm">{errors.description?.message}</p>
 
-        {/* Category */}
         <select {...register("category")} className={input}>
           <option value="Tech">Tech</option>
           <option value="Health">Health</option>
@@ -125,11 +133,7 @@ export default function AddIdeaPage() {
           <option value="Education">Education</option>
         </select>
 
-        <input
-          {...register("tags")}
-          placeholder="Tags (optional)"
-          className={input}
-        />
+        <input {...register("tags")} placeholder="Tags" className={input} />
 
         <input
           {...register("image")}
@@ -139,45 +143,33 @@ export default function AddIdeaPage() {
 
         <input
           {...register("budget")}
-          placeholder="Estimated Budget"
+          placeholder="Budget"
           className={input}
         />
 
-        {/* Audience */}
-        <div>
-          <input
-            {...register("audience", {
-              required: "Target audience is required",
-            })}
-            placeholder="Target Audience"
-            className={input}
-          />
-          <p className="text-red-500 text-sm">
-            {errors.audience?.message}
-          </p>
-        </div>
+        <input
+          {...register("audience", { required: "Required" })}
+          placeholder="Target Audience"
+          className={input}
+        />
+        <p className="text-red-500 text-sm">{errors.audience?.message}</p>
 
-        {/* Problem */}
         <textarea
           {...register("problem")}
-          placeholder="Problem Statement"
+          placeholder="Problem"
           className={`${input} md:col-span-2`}
-          rows="3"
         />
 
-        {/* Solution */}
         <textarea
           {...register("solution")}
-          placeholder="Proposed Solution"
+          placeholder="Solution"
           className={`${input} md:col-span-2`}
-          rows="3"
         />
 
-        {/* Button */}
         <button
           type="submit"
           disabled={loading}
-          className="md:col-span-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded-lg font-semibold transition"
+          className="md:col-span-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded-lg font-semibold"
         >
           {loading ? "Submitting..." : "Submit Idea"}
         </button>
